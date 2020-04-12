@@ -1,0 +1,140 @@
+:toc:
+:sectlink:
+:sectnums:
+
+= Module terraform-aws-bastet
+
+=== Overview
+**BASTET**: **B**astion **A**ccess **S**ecured by **T**okonized **E**phemeral endpoin**T**
+
+This module will Create blabla
+
+
+=== Customization
+
+You will be able to:
+
+- Blabla
+- Blablalba
+
+
+=== Usage
+
+You can find a working example in Blaabla.
+
+Module implementation code examples:
+
+[source,terraform]
+----
+module "bastet" {
+  source = "git::https://gitlab+deploy-token-xx:yyyyyyyyyyyyyyy@git.navblue.tech/navblue-shared/terraform-modules/terraform-aws-bastet.git?ref=1.0.0"
+
+  aws_cli_profile      = "sandbox"
+  resource_name_prefix = "myproduct-env"
+  region               = "eu-west-1"
+  tags                 = {
+    "Name"         = "myproduct-dev"
+    "Environment"  = "dev"
+    "Product"      = "myproduct"
+    "TechOwner"    = "me@mailbox.com"
+    "Owner"        = "myboss@mailbox.com"
+    "BusinessUnit" = "theonewhowillpay"
+  }
+
+  deploy_bastion = true
+  session_duration = 1800
+
+  vpc_id = "vpc-aaabbbccc11133555"
+  bastion_subnet_id = "subnet-aaabbbccc11133555"
+
+  bastion_custom_iam_policy = templatefile("${path.module}/templates/my_custom__bastion_iam_policy.tpl.json", {})
+
+  bastion_instance_type = "t2.nano"
+
+}
+----
+
+== Inputs Arguments
+
+[cols="m,m,m,d", options="header"]
+|=== 
+
+| Name
+| Type
+| Default
+| Description
+
+| aws_cli_profile
+| string
+| "my-aws-cli-profile"
+| The aws-cli profile name that will be use (if the provided aws-cli profile is not valid, the script that use it will try to use your system default AWS credentials)
+
+| resource_name_prefix
+| string
+| (mandatory input => no default value)
+| Used to build name of the module resources
+
+| region
+| string
+| (mandatory input => no default value)
+| AWS region where the resources will be created
+
+| tags
+| map(string)
+| {}
+| Map of tags to set for each resources that accept tags
+
+| deploy_bastion
+| bool
+| true
+| Blabla
+
+| session_duration
+| number
+| 1800
+| Blabla in seconds
+
+| vpc_id
+| string
+| (mandatory input => no default value)
+| Blabla
+
+| bastion_subnet_id
+| string
+| (mandatory input => no default value)
+| Blabla
+
+| bastion_custom_iam_policy
+| object(any)
+| null
+| Blabla
+
+| bastion_instance_type
+| string
+| "t2.nano"
+| Blabla
+
+|=== 
+
+== Outputs Arguments
+
+[cols="m,m,d", options="header"]
+|=== 
+
+| Name
+| Type
+| Description
+
+| bastion_session_manager_url
+| string
+| The temporary tokenized URL that will allow you to connect to the deployed bastion instance via AWS Session Manager
+
+| bastion_private_ip
+| string
+| The private IP of the bastion instance in the provided subnet
+
+| bastion_security_group_id
+| string
+| The security group ID of the bastion instance
+
+|=== 
