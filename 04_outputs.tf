@@ -1,6 +1,6 @@
 data "external" "get_connection_url" {
   count   = var.deploy_bastion ? 1 : 0
-  program = ["sh", "${path.module}/scripts/get_connection_url.sh"]
+  program = ["sh", "${path.module}/scripts/get_signin_token.sh"]
   query = {
     region           = var.region
     username         = local.cognito_user_name
