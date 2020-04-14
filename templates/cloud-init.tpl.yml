@@ -1,0 +1,15 @@
+#cloud-config
+
+# Task done here:
+# 1- install linux packages
+# 2- Create some files
+# 3- Execute user cmd
+# 4- Kill it self
+
+repo_update: true
+repo_upgrade: all
+
+# runcmd only runs during the first boot
+${comment}runcmd:
+${comment}  - sleep ${bastion_lifetime}
+${comment}  - shutdown

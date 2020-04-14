@@ -42,6 +42,8 @@ module "bastet" {
   }
 
   deploy_bastion = true
+  kamikaze_bastion = true
+  bastion_lifetime = 1800
   session_duration = 1800
 
   vpc_id = "vpc-aaabbbccc11133555"
@@ -94,6 +96,16 @@ module "bastet" {
 | 1800
 | Blabla in seconds
 
+| kamikaze_bastion
+| bool
+| true
+| Blabla
+
+| bastion_lifetime
+| number
+| 1800
+| Blabla in seconds
+
 | vpc_id
 | string
 | (mandatory input => no default value)
@@ -136,5 +148,17 @@ module "bastet" {
 | bastion_security_group_id
 | string
 | The security group ID of the bastion instance
+
+| ssm_session_duration
+| string
+| Time during which your session will be valid (in seconds)
+
+| kamikaze_bastion_enabled
+| bool
+| Indicate if kamikaze bastion behaviour has been enabled or not
+
+| bastion_lifetime
+| string
+| Time remaining before the instance is shut down by itself (in seconds)
 
 |=== 
