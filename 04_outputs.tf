@@ -9,7 +9,6 @@ data "external" "get_connection_url" {
     client_id        = aws_cognito_user_pool_client.cognito_user_pool_client[0].id
     identity_pool_id = aws_cognito_identity_pool.main[0].id
     session_duration = var.session_duration
-    instance_id      = aws_instance.bastion[0].id
   }
   depends_on = [
     null_resource.create_cognito_user[0]
@@ -17,11 +16,11 @@ data "external" "get_connection_url" {
 }
 
 output "bastion_session_manager_url" {
-  value = try(data.external.get_connection_url[0].result.aws_session_manager_console_url, null)
+  value = try("https://signin.aws.amazon.com/federation?Action=login&Destination=https://${var.region}.console.aws.amazon.com/systems-manager/session-manager/${aws_instance.bastion[0].id}?region=${var.region}&SigninToken=${data.external.get_connection_url[0].result.signin_token}", null)
 }
 
 output "bastion_private_ip" {
-  value = var.deploy_bastion ? aws_instance.bastion[0].private_ip : null
+  value = try(aws_instance.bastion[0].private_ip, null)
 }
 
 output "bastion_security_group_id" {

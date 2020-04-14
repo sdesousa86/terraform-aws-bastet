@@ -27,9 +27,9 @@ variable "deploy_bastion" {
 }
 
 variable "session_duration" {
-  description = "Blabla"
+  description = "Time during which your session will be valid (in seconds). The value can range from 900 seconds (15 minutes) to 129,600 seconds (36 hours)"
   type        = number
-  default     = 1800
+  default     = 900
 }
 
 variable "kamikaze_bastion" {

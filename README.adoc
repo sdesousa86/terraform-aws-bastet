@@ -42,7 +42,7 @@ module "bastet" {
   }
 
   deploy_bastion = true
-  kamikaze_bastion = true
+  auto_switch_off_bastion = true
   bastion_lifetime = 1800
   session_duration = 1800
 
@@ -93,8 +93,8 @@ module "bastet" {
 
 | session_duration
 | number
-| 1800
-| Blabla in seconds
+| 900
+| Time during which your session will be valid (in seconds). The value can range from 900 seconds (15 minutes) to 129,600 seconds (36 hours)
 
 | kamikaze_bastion
 | bool

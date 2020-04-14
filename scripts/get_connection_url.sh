@@ -17,6 +17,9 @@ JWT_ID_TOKEN=$(curl -s -X POST \
   -H 'X-Amz-Target: AWSCognitoIdentityProviderService.InitiateAuth' \
   --data '{"AuthParameters" : { "USERNAME" : "'${USERNAME}'", "PASSWORD" : "'${PASSWORD}'" }, "AuthFlow" : "USER_PASSWORD_AUTH", "ClientId" : "'${CLIENT_ID}'" }' \
   https://cognito-idp.eu-west-1.amazonaws.com/ | jq -r .AuthenticationResult.IdToken);
+# echo "JWT_ID_TOKEN:" >> get_url.logs;
+# echo $JWT_ID_TOKEN >> get_url.logs;
+# echo "" > get_url.logs;
 
 # We then get our account login id 
 IDENTITY_ID=$(curl -s -X POST \
@@ -24,6 +27,9 @@ IDENTITY_ID=$(curl -s -X POST \
   -H 'X-Amz-Target: AWSCognitoIdentityService.GetId' \
   --data '{"IdentityPoolId" : "'${IDENTITY_POOL_ID}'", "Logins": {"cognito-idp.'${REGION}'.amazonaws.com/'${USER_POOL_ID}'": "'${JWT_ID_TOKEN}'"} }' \
   https://cognito-identity.eu-west-1.amazonaws.com/ | jq -r .IdentityId);
+# echo "IDENTITY_ID:" >> get_url.logs;
+# echo $IDENTITY_ID >> get_url.logs;
+# echo "" >> get_url.logs;
 
 # We retreive credentials from cognito
 CREDS=$(curl -s -X POST \
@@ -31,6 +37,9 @@ CREDS=$(curl -s -X POST \
   -H 'X-Amz-Target:AWSCognitoIdentityService.GetCredentialsForIdentity' \
   --data '{"IdentityId": "'${IDENTITY_ID}'", "Logins": {"cognito-idp.'${REGION}'.amazonaws.com/'${USER_POOL_ID}'": "'${JWT_ID_TOKEN}'"}}' \
   https://cognito-identity.${REGION}.amazonaws.com/);
+# echo "CREDS:" >> get_url.logs;
+# echo $CREDS >> get_url.logs;
+# echo "" >> get_url.logs;
 
 # We export session information
 AWS_ACCESS_KEY_ID=`echo $CREDS| jq -r .Credentials.AccessKeyId`;
@@ -38,20 +47,28 @@ AWS_SECRET_ACCESS_KEY=`echo $CREDS| jq -r .Credentials.SecretKey`;
 AWS_SESSION_TOKEN=`echo $CREDS| jq -r .Credentials.SessionToken`;
 
 STRING_TO_BE_URL_ENCODED="{\"sessionId\":\"$AWS_ACCESS_KEY_ID\",\"sessionKey\":\"$AWS_SECRET_ACCESS_KEY\",\"sessionToken\":\"$AWS_SESSION_TOKEN\"}";
+# echo "STRING_TO_BE_URL_ENCODED:" >> get_url.logs;
+# echo $STRING_TO_BE_URL_ENCODED >> get_url.logs;
+# echo "" >> get_url.logs;
 
 URL_ENCODED_STRING=$(python urlencode.py -s $STRING_TO_BE_URL_ENCODED);
+# echo "URL_ENCODED_STRING:" >> get_url.logs;
+# echo $URL_ENCODED_STRING >> get_url.logs;
+# echo "" >> get_url.logs;
 
 # Building URL to retrieve the SigninToken
 GET_SIGNIN_TOKEN_URL="https://signin.aws.amazon.com/federation?Action=getSigninToken&SessionDuration=$SESSION_DURATION&Session=$URL_ENCODED_STRING"
+# echo "GET_SIGNIN_TOKEN_URL:" >> get_url.logs;
+# echo $GET_SIGNIN_TOKEN_URL >> get_url.logs;
+# echo "" >> get_url.logs;
 
 # Get the SigninToken
 GET_SIGNIN_TOKEN_ANSWER=$(curl ${GET_SIGNIN_TOKEN_URL})
+# echo "GET_SIGNIN_TOKEN_ANSWER:" >> get_url.logs;
+# echo $GET_SIGNIN_TOKEN_ANSWER >> get_url.logs;
+# echo "" >> get_url.logs;
 
 
 SIGNIN_TOKEN=`echo $GET_SIGNIN_TOKEN_ANSWER| jq -r .SigninToken`;
 
-# Building the final AWS Management Console url
-AWS_SESSION_MANAGER_CONSOLE_URL="https://signin.aws.amazon.com/federation?Action=login&Destination=https://$REGION.console.aws.amazon.com/systems-manager/session-manager/$INSTANCE_ID?region=$REGION&SigninToken=$SIGNIN_TOKEN"
-
-
-jq -n --arg aws_session_manager_console_url "$AWS_SESSION_MANAGER_CONSOLE_URL" '{"aws_session_manager_console_url":$aws_session_manager_console_url}'
+jq -n --arg signin_token "$SIGNIN_TOKEN" '{"signin_token":$signin_token}'
