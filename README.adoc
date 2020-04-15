@@ -43,7 +43,7 @@ Module implementation code examples:
 [source,terraform]
 ----
 module "bastet" {
-  source = "github.com/sdesousa86/terraform-aws-bastet.git?ref=1.0.0"
+  source = "github.com/sdesousa86/terraform-aws-bastet.git?ref=1.1.0"
 
   aws_cli_profile      = "sandbox"
   resource_name_prefix = "myproduct-env"
