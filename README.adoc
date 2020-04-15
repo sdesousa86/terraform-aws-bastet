@@ -16,7 +16,7 @@ Requirements:
 
 - Terraform 0.12 or upper
 - aws-cli
-- python 2 (not working with python3)
+- python 3
 - bash/sh
 - curl
 - jq
@@ -24,7 +24,7 @@ Requirements:
 Limitation:
 
 - Amazon Linux AMI bastion only (cannot be customized)
-- The `urlencode.py` python script works only with python 2 (The module execution will fail if you are using python 3)
+- The `urlencode.py` python script works only with python 3 (The module execution will fail if you are using python 2)
 
 
 === Customization
