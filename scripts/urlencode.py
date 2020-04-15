@@ -1,6 +1,5 @@
 import getopt
 import sys
-import urllib.parse
 
 
 def usage():
@@ -12,7 +11,18 @@ def usage():
 
 
 def encode(arg):
-    return urllib.parse.quote(arg)
+    version = sys.version_info
+    if version >= (3, 0) and version < (4, 0):
+        import urllib.parse
+        return urllib.parse.quote(arg)
+
+    if version >= (2, 0) and version < (3, 0):
+        import urllib
+        return urllib.quote(arg)
+    
+    print('\x1b[1;31;40m' + 'ERROR: Unsupported Python version' + '\x1b[0m') 
+    sys.exit(3)
+
 
 
 def main(argv):
