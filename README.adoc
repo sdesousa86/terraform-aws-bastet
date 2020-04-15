@@ -4,24 +4,41 @@
 
 = Module terraform-aws-bastet
 
-=== Overview
-**BASTET**: **B**astion **A**ccess **S**ecured by **T**okonized **E**phemeral endpoin**T**
+image::./terraform-aws-bastet.png[terraform-aws-bastet.png,width=880]
 
-This module will Create blabla
+=== Overview
+**BASTET**: **B**astion **A**ccess **S**ecured by **T**okenized **E**phemeral endpoin**T**
+
+This Terraform module will Create an EC2 instance on the desired subnet of your VPC and allow you to connect to it via AWS Session Manager.
+
+=== Module limitations and requirements
+Requirements:
+
+- Terraform 0.12 or upper
+- aws-cli
+- python 2 (not working with python3)
+- bash/sh
+- curl
+- jq
+
+Limitation:
+
+- Amazon Linux AMI bastion only (cannot be customized)
+- The `urlencode.py` python script works only with python 2 (The module execution will fail if you are using python 3)
 
 
 === Customization
-
 You will be able to:
 
-- Blabla
-- Blablalba
+- Activate or not the EC2 instance bastion creation
+- Choose how many time your AWS SSM session will be valid.
+- Activate or not the auto-shutdown (kamikaze) behavior of your bastion
+- Choose how many time your bastion will stay up and running before auto-shutdown (if activated)
+- Add a custom IAM rôle policy to your bastion EC2 instance if needed
+- Choose the instance type (default: `t2.nano`)
 
 
 === Usage
-
-You can find a working example in Blaabla.
-
 Module implementation code examples:
 
 [source,terraform]
@@ -89,7 +106,7 @@ module "bastet" {
 | deploy_bastion
 | bool
 | true
-| Blabla
+| Activate or not the EC2 instance bastion creation
 
 | session_duration
 | number
@@ -99,32 +116,32 @@ module "bastet" {
 | kamikaze_bastion
 | bool
 | true
-| Blabla
+| Activate or not the auto-shutdown (kamikaze) behavior of your bastion
 
 | bastion_lifetime
 | number
-| 1800
-| Blabla in seconds
+| 900
+| Time, in seconds, before your bastion will automatically shutdown (only if kamikaze_bastion = true)
 
 | vpc_id
 | string
 | (mandatory input => no default value)
-| Blabla
+| The ID of your AWS VPC where your bastion will run
 
 | bastion_subnet_id
 | string
 | (mandatory input => no default value)
-| Blabla
+| The ID of the subnet where your bastion will run
 
 | bastion_custom_iam_policy
-| object(any)
+| any
 | null
-| Blabla
+| A custom IAM rôle policy JSON object for your bastion EC2 instance (optional)
 
 | bastion_instance_type
 | string
 | "t2.nano"
-| Blabla
+| The bastion instance type
 
 |=== 
 
