@@ -11,6 +11,10 @@ def usage():
     """)
 
 
+def encode(arg):
+    return urllib.parse.quote(arg)
+
+
 def main(argv):
     string_to_encode = ""
     try:
@@ -41,7 +45,8 @@ def main(argv):
         usage()
         sys.exit(2)
 
-    print(urllib.parse.quote(string_to_encode))
+    print(encode(string_to_encode))
 
 
-main(sys.argv[1:])
+if __name__ == "__main__":
+    main(sys.argv[1:])
