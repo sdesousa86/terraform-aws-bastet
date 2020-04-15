@@ -9,7 +9,7 @@ image::./terraform-aws-bastet.png[terraform-aws-bastet.png,width=880]
 === Overview
 **BASTET**: **B**astion **A**ccess **S**ecured by **T**okenized **E**phemeral endpoin**T**
 
-This Terraform module will Create an EC2 instance on the desired subnet of your VPC and allow you to connect to it via AWS Session Manager.
+This Terraform module will Create an EC2 instance in the desired subnet of your VPC and allow you to connect to it via AWS Session Manager.
 
 === Module limitations and requirements
 Requirements:
