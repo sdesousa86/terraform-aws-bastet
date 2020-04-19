@@ -36,18 +36,63 @@ resource "aws_iam_instance_profile" "bastion" {
 }
 
 ##
+# Generate a random SSH port (when classic-bastion mode is enabled)
+##
+resource "random_integer" "ssh_port" {
+  count = var.classic_bastion && var.deploy_bastion ? 1 : 0
+  min   = 1024
+  max   = 65535
+}
+locals {
+  ssh_port = try(random_integer.ssh_port[0].result, 22)
+}
+
+##
 # Security Group for the bastion instance
 ##
 resource "aws_security_group" "bastion" {
   name   = "${var.resource_name_prefix}-bastion"
   vpc_id = var.vpc_id
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  tags = merge(var.tags, { "Name" = "${var.resource_name_prefix}-bastion" })
+  tags   = merge(var.tags, { "Name" = "${var.resource_name_prefix}-bastion" })
+}
+
+resource "aws_security_group_rule" "bastion_egress" {
+  security_group_id = aws_security_group.bastion.id
+  type              = "egress"
+  protocol          = "-1"
+  from_port         = 0
+  to_port           = 0
+  cidr_blocks       = ["0.0.0.0/0"]
+}
+
+resource "aws_security_group_rule" "bastion_ingress" {
+  count             = var.classic_bastion && var.deploy_bastion ? 1 : 0
+  security_group_id = aws_security_group.bastion.id
+  type              = "ingress"
+  protocol          = "tcp"
+  from_port         = local.ssh_port
+  to_port           = local.ssh_port
+  cidr_blocks       = var.classic_bastion_ingress_cidr_blocks
+}
+
+##
+# Generate a SSH key and an AWS key pair in order to be able to connect to the bastion EC2 instance (when classic-bastion mode is enabled)
+##
+resource "tls_private_key" "bastion" {
+  count     = var.classic_bastion && var.deploy_bastion ? 1 : 0
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "aws_key_pair" "bastion" {
+  count      = var.classic_bastion && var.deploy_bastion ? 1 : 0
+  public_key = tls_private_key.bastion[0].public_key_openssh
+}
+
+resource "local_file" "bastion" {
+  count    = var.classic_bastion && var.deploy_bastion ? 1 : 0
+  content  = tls_private_key.bastion[0].private_key_pem
+  filename = "./target/bastion-private-key.pem"
 }
 
 ##
@@ -75,17 +120,23 @@ resource "aws_instance" "bastion" {
 
   ami           = data.aws_ami.bastion.id
   instance_type = var.bastion_instance_type
+  key_name      = try(aws_key_pair.bastion[0].key_name, null)
 
   subnet_id                   = var.bastion_subnet_id
   vpc_security_group_ids      = [aws_security_group.bastion.id]
-  associate_public_ip_address = false
+  associate_public_ip_address = var.bastion_subnet_is_public
 
   disable_api_termination              = false
   instance_initiated_shutdown_behavior = "terminate"
 
   user_data = base64encode(templatefile("${path.module}/templates/cloud-init.tpl.yml", {
-    comment          = var.kamikaze_bastion ? "" : "#"
-    bastion_lifetime = var.bastion_lifetime
+    write_files = var.classic_bastion ? templatefile("${path.module}/templates/bastion-write-file.tpl.yml", {
+      new_ssh_port = local.ssh_port
+    }) : ""
+    comment_runcmd          = var.classic_bastion || var.kamikaze_bastion ? "" : "#"
+    comment_change_ssh_port = var.classic_bastion ? "" : "#"
+    comment_kamikaze        = var.kamikaze_bastion ? "" : "#"
+    bastion_lifetime        = var.bastion_lifetime
   }))
 
   iam_instance_profile = aws_iam_instance_profile.bastion.name

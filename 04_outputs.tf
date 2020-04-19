@@ -1,4 +1,4 @@
-data "external" "get_connection_url" {
+data "external" "get_signin_token" {
   count   = var.deploy_bastion ? 1 : 0
   program = ["sh", "${path.module}/scripts/get_signin_token.sh"]
   query = {
@@ -16,11 +16,11 @@ data "external" "get_connection_url" {
 }
 
 output "bastion_session_manager_url" {
-  value = try("https://signin.aws.amazon.com/federation?Action=login&Destination=https://${var.region}.console.aws.amazon.com/systems-manager/session-manager/${aws_instance.bastion[0].id}?region=${var.region}&SigninToken=${data.external.get_connection_url[0].result.signin_token}", null)
+  value = try("https://signin.aws.amazon.com/federation?Action=login&Destination=https://${var.region}.console.aws.amazon.com/systems-manager/session-manager/${aws_instance.bastion[0].id}?region=${var.region}&SigninToken=${data.external.get_signin_token[0].result.signin_token}", null)
 }
 
 output "bastion_private_ip" {
-  value = try(aws_instance.bastion[0].private_ip, null)
+  value = var.deploy_bastion ? try(aws_instance.bastion[0].private_ip, null) : null
 }
 
 output "bastion_security_group_id" {
@@ -39,3 +39,18 @@ output "bastion_lifetime" {
   value = var.kamikaze_bastion ? "${var.bastion_lifetime} seconds" : "infinite"
 }
 
+output "bastion_deployed" {
+  value = var.deploy_bastion
+}
+
+output "classic_bastion_public_ip" {
+  value = var.classic_bastion && var.deploy_bastion ? try(aws_instance.bastion[0].public_ip, null) : null
+}
+
+output "classic_bastion_private_key" {
+  value = var.classic_bastion && var.deploy_bastion ? try(local_file.bastion[0].filename, null) : null
+}
+
+output "classic_bastion_ssh_port" {
+  value = var.classic_bastion && var.deploy_bastion ? local.ssh_port : null
+}

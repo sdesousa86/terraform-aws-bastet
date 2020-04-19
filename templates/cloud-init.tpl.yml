@@ -9,7 +9,11 @@
 repo_update: true
 repo_upgrade: all
 
+# Write files
+${write_files}
+
 # runcmd only runs during the first boot
-${comment}runcmd:
-${comment}  - sleep ${bastion_lifetime}
-${comment}  - shutdown
+${comment_runcmd}runcmd:
+${comment_change_ssh_port}  - /usr/local/bin/change_ssh_port.sh
+${comment_kamikaze}  - sleep ${bastion_lifetime}
+${comment_kamikaze}  - shutdown

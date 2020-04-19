@@ -35,6 +35,7 @@ You will be able to:
 - Choose how many time your bastion will stay up and running before auto-shutdown (if activated)
 - Add a custom IAM rôle policy to your bastion EC2 instance if needed
 - Choose the instance type (default: `t2.nano`)
+- Switch to classic-bastion mode (SSH key + random SSH port)
 
 
 === Usage
@@ -43,7 +44,7 @@ Module implementation code examples:
 [source,terraform]
 ----
 module "bastet" {
-  source = "github.com/sdesousa86/terraform-aws-bastet.git?ref=1.1.0"
+  source = "github.com/sdesousa86/terraform-aws-bastet.git?ref=2.0.0"
 
   aws_cli_profile      = "sandbox"
   resource_name_prefix = "myproduct-env"
@@ -57,19 +58,28 @@ module "bastet" {
     "BusinessUnit" = "theonewhowillpay"
   }
 
-  deploy_bastion = true
+  deploy_bastion          = true
   auto_switch_off_bastion = true
-  bastion_lifetime = 1800
-  session_duration = 1800
+  bastion_lifetime        = 1800
+  session_duration        = 1800
+  classic_bastion         = true
 
-  vpc_id = "vpc-aaabbbccc11133555"
-  bastion_subnet_id = "subnet-aaabbbccc11133555"
+  vpc_id                              = "vpc-aaabbbccc11133555"
+  bastion_subnet_id                   = "subnet-aaabbbccc11133555"
+  bastion_subnet_is_public            = true
+  classic_bastion_ingress_cidr_blocks = ["0.0.0.0/0"]
 
   bastion_custom_iam_policy = templatefile("${path.module}/templates/my_custom__bastion_iam_policy.tpl.json", {})
 
   bastion_instance_type = "t2.nano"
 
 }
+----
+
+SSH connection (classic-bastion mode enabled):
+[source,bash]
+----
+ssh -i ./bastion_private_key.pem -p <classic_bastion_ssh_port> ec2-user@<classic_bastion_public_ip>
 ----
 
 == Inputs Arguments
@@ -82,20 +92,35 @@ module "bastet" {
 | Default
 | Description
 
+| resource_name_prefix
+| string
+| N/A
+| Used to build name of the module resources (**mandatory input => no default value**)
+
+| region
+| string
+| N/A
+| AWS region where the resources will be created (**mandatory input => no default value**)
+
+| vpc_id
+| string
+| N/A
+| The ID of your AWS VPC where your bastion will run (**mandatory input => no default value**)
+
+| bastion_subnet_id
+| string
+| N/A
+| The ID of the subnet where your bastion will run (**mandatory input => no default value**)
+
+| bastion_subnet_is_public
+| bool
+| N/A
+| You must indicate if the provided subnet is a public subnet (Route table with route to an Internet Gateway) or not (**mandatory input => no default value**)
+
 | aws_cli_profile
 | string
 | "my-aws-cli-profile"
 | The aws-cli profile name that will be use (if the provided aws-cli profile is not valid, the script that use it will try to use your system default AWS credentials)
-
-| resource_name_prefix
-| string
-| (mandatory input => no default value)
-| Used to build name of the module resources
-
-| region
-| string
-| (mandatory input => no default value)
-| AWS region where the resources will be created
 
 | tags
 | map(string)
@@ -107,10 +132,20 @@ module "bastet" {
 | true
 | Activate or not the EC2 instance bastion creation
 
+| classic_bastion
+| bool
+| false
+| Switch to classic-bastion mode (SSH key + random SSH port)
+
+| classic_bastion_ingress_cidr_blocks
+| list(string)
+| null
+| IPs to whithelist for classic-bastion access (**!! Mandatory input if classic_bastion = true !!** (Even if you want to set it to ["0.0.0.0/0"]))
+
 | session_duration
 | number
 | 900
-| Time during which your session will be valid (in seconds). The value can range from 900 seconds (15 minutes) to 129,600 seconds (36 hours)
+| Time during which tokenized URL will be valid (in seconds). Min: 900 seconds (15 minutes) - Max: 43,200 seconds (12 hours)
 
 | kamikaze_bastion
 | bool
@@ -121,16 +156,6 @@ module "bastet" {
 | number
 | 900
 | Time, in seconds, before your bastion will automatically shutdown (only if kamikaze_bastion = true)
-
-| vpc_id
-| string
-| (mandatory input => no default value)
-| The ID of your AWS VPC where your bastion will run
-
-| bastion_subnet_id
-| string
-| (mandatory input => no default value)
-| The ID of the subnet where your bastion will run
 
 | bastion_custom_iam_policy
 | any
@@ -176,5 +201,21 @@ module "bastet" {
 | bastion_lifetime
 | string
 | Time remaining before the instance is shut down by itself (in seconds)
+
+| bastion_deployed
+| string
+| Indicate if the deploy_bastion input argument as been set to true or false
+
+| classic_bastion_public_ip
+| string
+| The public IP of the bastion (**when classic-bastion mode is enabled**)
+
+| classic_bastion_private_key
+| string
+| The local relative path where the bastion private key file (`bastion-private-key.pem`) has been created (**when classic-bastion mode is enabled**)
+
+| classic_bastion_ssh_port
+| string
+| The random SSH port to connect to the bastion (**when classic-bastion mode is enabled**)
 
 |=== 

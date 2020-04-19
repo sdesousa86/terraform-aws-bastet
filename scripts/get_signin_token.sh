@@ -9,7 +9,7 @@ cd "$(dirname "$0")";
 # FOO and BAZ shell variables.
 # jq will ensure that the values are properly quoted
 # and escaped for consumption by the shell.
-eval "$(jq -r '@sh "REGION=\(.region) USERNAME=\(.username) PASSWORD=\(.password) USER_POOL_ID=\(.user_pool_id) CLIENT_ID=\(.client_id) IDENTITY_POOL_ID=\(.identity_pool_id) SESSION_DURATION=\(.session_duration) INSTANCE_ID=\(.instance_id)"')";
+eval "$(jq -r '@sh "REGION=\(.region) USERNAME=\(.username) PASSWORD=\(.password) USER_POOL_ID=\(.user_pool_id) CLIENT_ID=\(.client_id) IDENTITY_POOL_ID=\(.identity_pool_id) SESSION_DURATION=\(.session_duration)"')";
 
 # We first retreive a JWT token from cognito user pool
 JWT_ID_TOKEN=$(curl -s -X POST \

@@ -86,7 +86,8 @@ resource "aws_iam_role" "authenticated" {
   assume_role_policy = templatefile("${path.module}/templates/authenticated-role-assume-role-policy.tpl.json", {
     aws_cognito_identity_pool_main_id = aws_cognito_identity_pool.main[0].id
   })
-  tags = merge(var.tags, { "Name" = "${var.resource_name_prefix}-bastet" })
+  max_session_duration = 43200
+  tags                 = merge(var.tags, { "Name" = "${var.resource_name_prefix}-bastet" })
 }
 
 resource "aws_iam_role" "unauthenticated" {
