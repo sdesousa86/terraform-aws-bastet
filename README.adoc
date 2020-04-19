@@ -58,11 +58,11 @@ module "bastet" {
     "BusinessUnit" = "theonewhowillpay"
   }
 
-  deploy_bastion          = true
-  auto_switch_off_bastion = true
-  bastion_lifetime        = 1800
-  session_duration        = 1800
-  classic_bastion         = true
+  deploy_bastion   = true
+  kamikaze_bastion = true
+  bastion_lifetime = 1800
+  session_duration = 1800
+  classic_bastion  = true
 
   vpc_id                              = "vpc-aaabbbccc11133555"
   bastion_subnet_id                   = "subnet-aaabbbccc11133555"
