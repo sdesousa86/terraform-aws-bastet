@@ -19,20 +19,20 @@ resource "aws_iam_role" "bastion" {
 
 resource "aws_iam_role_policy" "bastion_basic_policy" {
   name   = "${var.resource_name_prefix}-bastion-basic-policy"
-  role   = aws_iam_role.bastion.name
+  role   = aws_iam_role.bastion.id
   policy = templatefile("${path.module}/templates/bastion-basic-instance-profile-policy.json", {})
 }
 
 resource "aws_iam_role_policy" "bastion_custom_policy" {
   count  = var.bastion_custom_iam_policy != null ? 1 : 0
   name   = "${var.resource_name_prefix}-bastion-custom-policy"
-  role   = aws_iam_role.bastion.name
+  role   = aws_iam_role.bastion.id
   policy = var.bastion_custom_iam_policy
 }
 
 resource "aws_iam_instance_profile" "bastion" {
   name = "${var.resource_name_prefix}-bastion"
-  role = aws_iam_role.bastion.name
+  role = aws_iam_role.bastion.id
 }
 
 ##
@@ -139,7 +139,7 @@ resource "aws_instance" "bastion" {
     bastion_lifetime        = var.bastion_lifetime
   }))
 
-  iam_instance_profile = aws_iam_instance_profile.bastion.name
+  iam_instance_profile = aws_iam_instance_profile.bastion.id
 
   tags        = merge(var.tags, { "Name" = "${var.resource_name_prefix}-bastion" })
   volume_tags = merge(var.tags, { "Name" = "${var.resource_name_prefix}-bastion" })
