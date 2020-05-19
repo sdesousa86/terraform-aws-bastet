@@ -7,7 +7,19 @@
                 "ssm:DescribeSessions",
                 "ssm:StartSession"
             ],
-            "Resource": "${instance_arn}"
+            "Resource": [
+                "${instance_arn}",
+                "arn:aws:ssm:${region}:${account_id}:document/AWS-StartSSHSession"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:TerminateSession"
+            ],
+            "Resource": [
+                "arn:aws:ssm:${region}:${account_id}:session/*"
+            ]
         }
     ]
 }

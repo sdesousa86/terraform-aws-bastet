@@ -99,12 +99,16 @@ resource "aws_iam_role" "unauthenticated" {
   tags = merge(var.tags, { "Name" = "${var.resource_name_prefix}-unauthenticated-bastet" })
 }
 
+data "aws_caller_identity" "current" {}
+
 resource "aws_iam_role_policy" "authenticated" {
   count = var.deploy_bastion ? 1 : 0
   name  = "${var.resource_name_prefix}-bastet"
   role  = aws_iam_role.authenticated[0].id
   policy = templatefile("${path.module}/templates/authenticated-role-policy.tpl.json", {
     instance_arn = aws_instance.bastion[0].arn
+    region       = var.region
+    account_id   = data.aws_caller_identity.current.account_id
   })
 }
 

@@ -71,4 +71,5 @@ GET_SIGNIN_TOKEN_ANSWER=$(curl ${GET_SIGNIN_TOKEN_URL})
 
 SIGNIN_TOKEN=`echo $GET_SIGNIN_TOKEN_ANSWER| jq -r .SigninToken`;
 
-jq -n --arg signin_token "$SIGNIN_TOKEN" '{"signin_token":$signin_token}'
+
+jq -n --arg signin_token "$SIGNIN_TOKEN" --arg aws_access_key_id "$AWS_ACCESS_KEY_ID" --arg aws_secret_access_key "$AWS_SECRET_ACCESS_KEY" --arg aws_session_token "$AWS_SESSION_TOKEN" '{"signin_token":$signin_token, "aws_access_key_id":$aws_access_key_id, "aws_secret_access_key":$aws_secret_access_key, "aws_session_token":$aws_session_token}'

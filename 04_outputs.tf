@@ -19,6 +19,18 @@ output "bastion_session_manager_url" {
   value = try("https://signin.aws.amazon.com/federation?Action=login&Destination=https://${var.region}.console.aws.amazon.com/systems-manager/session-manager/${aws_instance.bastion[0].id}?region=${var.region}&SigninToken=${data.external.get_signin_token[0].result.signin_token}", null)
 }
 
+output "iam_role_temporary_credentials" {
+  value = {
+    aws_access_key_id     = try(data.external.get_signin_token[0].result.aws_access_key_id, null)
+    aws_secret_access_key = try(data.external.get_signin_token[0].result.aws_secret_access_key, null)
+    aws_session_token     = try(data.external.get_signin_token[0].result.aws_session_token, null)
+  }
+}
+
+output "bastion_instance_id" {
+  value = var.deploy_bastion ? try(aws_instance.bastion[0].id, null) : null
+}
+
 output "bastion_private_ip" {
   value = var.deploy_bastion ? try(aws_instance.bastion[0].private_ip, null) : null
 }
