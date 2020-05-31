@@ -84,15 +84,67 @@ locals {
   validate_bastion_subnet_is_public = index(local.is_bastion_subnet_is_public_valid, "YES")
 }
 
-
+variable "bastion_custom_iam_policy_provided" {
+  type    = bool
+  default = false
+}
 variable "bastion_custom_iam_policy" {
   description = "A custom IAM rôle policy JSON object for your bastion EC2 instance (optional)"
   type        = any
   default     = null
+}
+locals {
+  is_bastion_custom_iam_policy_valid = (var.bastion_custom_iam_policy_provided == true && var.bastion_custom_iam_policy != null) || (var.bastion_custom_iam_policy_provided == false && var.bastion_custom_iam_policy == null) ? ["YES"] : ["NO"]
+  validate_bastion_custom_iam_policy = index(local.is_bastion_custom_iam_policy_valid, "YES")
 }
 
 variable "bastion_instance_type" {
   description = "The bastion instance type"
   type        = string
   default     = "t2.nano"
+}
+
+variable "aditionnal_cloud_init_packages_provided" {
+  type    = bool
+  default = false
+}
+variable "aditionnal_cloud_init_packages" {
+  description = "Cloud Init YAML string starting with 'packages:'"
+
+  type    = string
+  default = null
+}
+locals {
+  is_aditionnal_cloud_init_packages_valid = (var.aditionnal_cloud_init_packages_provided == true && var.aditionnal_cloud_init_packages != null) || (var.aditionnal_cloud_init_packages_provided == false && var.aditionnal_cloud_init_packages == null) ? ["YES"] : ["NO"]
+  validate_aditionnal_cloud_init_packages = index(local.is_aditionnal_cloud_init_packages_valid, "YES")
+}
+
+variable "aditionnal_cloud_init_write_files_provided" {
+  type    = bool
+  default = false
+}
+variable "aditionnal_cloud_init_write_files" {
+  description = "Cloud Init YAML string starting with 'write_files:'"
+
+  type    = string
+  default = null
+}
+locals {
+  is_aditionnal_cloud_init_write_files_valid = (var.aditionnal_cloud_init_write_files_provided == true && var.aditionnal_cloud_init_write_files != null) || (var.aditionnal_cloud_init_write_files_provided == false && var.aditionnal_cloud_init_write_files == null) ? ["YES"] : ["NO"]
+  validate_aditionnal_cloud_init_write_files = index(local.is_aditionnal_cloud_init_write_files_valid, "YES")
+}
+
+variable "aditionnal_cloud_init_runcmd_provided" {
+  type    = bool
+  default = false
+}
+variable "aditionnal_cloud_init_runcmd" {
+  description = "Cloud Init YAML string starting with 'runcmd:'"
+
+  type    = string
+  default = null
+}
+locals {
+  is_aditionnal_cloud_init_runcmd_valid = (var.aditionnal_cloud_init_runcmd_provided == true && var.aditionnal_cloud_init_runcmd != null) || (var.aditionnal_cloud_init_runcmd_provided == false && var.aditionnal_cloud_init_runcmd == null) ? ["YES"] : ["NO"]
+  validate_aditionnal_cloud_init_runcmd = index(local.is_aditionnal_cloud_init_runcmd_valid, "YES")
 }

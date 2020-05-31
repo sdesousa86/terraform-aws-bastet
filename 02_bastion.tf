@@ -24,7 +24,7 @@ resource "aws_iam_role_policy" "bastion_basic_policy" {
 }
 
 resource "aws_iam_role_policy" "bastion_custom_policy" {
-  count  = var.bastion_custom_iam_policy != null ? 1 : 0
+  count  = var.bastion_custom_iam_policy_provided ? 1 : 0
   name   = "${var.resource_name_prefix}-bastion-custom-policy"
   role   = aws_iam_role.bastion.id
   policy = var.bastion_custom_iam_policy
@@ -130,13 +130,15 @@ resource "aws_instance" "bastion" {
   instance_initiated_shutdown_behavior = "terminate"
 
   user_data = base64encode(templatefile("${path.module}/templates/cloud-init.tpl.yml", {
-    write_files = var.classic_bastion ? templatefile("${path.module}/templates/bastion-write-file.tpl.yml", {
+    change_ssh_port_write_files_block = var.classic_bastion ? templatefile("${path.module}/templates/change-ssh-port-write-files-block.tpl.yml", {
       new_ssh_port = local.ssh_port
     }) : ""
-    comment_runcmd          = var.classic_bastion || var.kamikaze_bastion ? "" : "#"
-    comment_change_ssh_port = var.classic_bastion ? "" : "#"
-    comment_kamikaze        = var.kamikaze_bastion ? "" : "#"
-    bastion_lifetime        = var.bastion_lifetime
+    aditionnal_cloud_init_packages    = var.aditionnal_cloud_init_packages_provided ? var.aditionnal_cloud_init_packages : ""
+    aditionnal_cloud_init_write_files = var.aditionnal_cloud_init_write_files_provided ? var.aditionnal_cloud_init_write_files : ""
+    aditionnal_cloud_init_runcmd      = var.aditionnal_cloud_init_runcmd_provided ? var.aditionnal_cloud_init_runcmd : ""
+    comment_change_ssh_port           = var.classic_bastion ? "" : "#"
+    comment_kamikaze                  = var.kamikaze_bastion ? "" : "#"
+    bastion_lifetime                  = var.bastion_lifetime
   }))
 
   iam_instance_profile = aws_iam_instance_profile.bastion.id

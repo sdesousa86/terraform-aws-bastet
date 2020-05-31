@@ -9,11 +9,18 @@
 repo_update: true
 repo_upgrade: all
 
+# Install package
+packages:
+${aditionnal_cloud_init_packages}
+
 # Write files
-${write_files}
+write_files:
+${change_ssh_port_write_files_block}
+${aditionnal_cloud_init_write_files}
 
 # runcmd only runs during the first boot
-${comment_runcmd}runcmd:
+runcmd:
 ${comment_change_ssh_port}  - /usr/local/bin/change_ssh_port.sh
+${aditionnal_cloud_init_runcmd}
 ${comment_kamikaze}  - sleep ${bastion_lifetime}
 ${comment_kamikaze}  - shutdown
