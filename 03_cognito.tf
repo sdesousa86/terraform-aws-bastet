@@ -29,15 +29,15 @@ resource "aws_cognito_user_pool_client" "cognito_user_pool_client" {
 ## Cognito user ##
 ##################
 resource "random_password" "bastet" {
-  count      = var.deploy_bastion ? 1 : 0
-  length     = 24
-  upper      = true
-  min_upper  = 1
-  lower      = true
-  min_lower  = 1
-  number     = true
-  min_number = 1
-  special    = false
+  count       = var.deploy_bastion ? 1 : 0
+  length      = 24
+  upper       = true
+  min_upper   = 1
+  lower       = true
+  min_lower   = 1
+  number      = true
+  min_numeric = 1
+  special     = false
 }
 
 locals {
