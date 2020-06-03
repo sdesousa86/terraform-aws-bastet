@@ -36,6 +36,8 @@ You will be able to:
 - Add a custom IAM rôle policy to your bastion EC2 instance if needed
 - Choose the instance type (default: `t2.nano`)
 - Switch to classic-bastion mode (SSH key + random SSH port)
+- Perform an SSH connection directly through Session Manager (aws-cli SSM plugin requiered) thanks to the temporary AWS credentials available in the module outputs
+- Customize the bastion cloud-init YAML file: capability to add `runcmd` and/or `write_files` and/or `packages` instructions to the instance user_data
 
 
 === Usage
@@ -69,12 +71,23 @@ module "bastet" {
   bastion_subnet_is_public            = true
   classic_bastion_ingress_cidr_blocks = ["0.0.0.0/0"]
 
-  bastion_custom_iam_policy = templatefile("${path.module}/templates/my_custom__bastion_iam_policy.tpl.json", {})
+  aditionnal_cloud_init_packages_provided = true
+  aditionnal_cloud_init_packages          = templatefile("${path.module}/templates/bastion-aditionnal-cloud-init-packages.tpl.yml", {})
+
+  bastion_custom_iam_policy_provided = true
+  bastion_custom_iam_policy          = templatefile("${path.module}/templates/my_custom__bastion_iam_policy.tpl.json", {})
 
   bastion_instance_type = "t2.nano"
 
 }
 ----
+
+With `bastion-aditionnal-cloud-init-packages.tpl.yml` equal to:
+[source,yaml]
+----
+  - mysql
+----
+NOTE: !!! Watch out for the indentation in the aditionnal_cloud_init_* template files !!!
 
 SSH connection (classic-bastion mode enabled):
 [source,bash]
@@ -157,6 +170,11 @@ ssh -i ./bastion_private_key.pem -p <classic_bastion_ssh_port> ec2-user@<classic
 | 900
 | Time, in seconds, before your bastion will automatically shutdown (only if kamikaze_bastion = true)
 
+| bastion_custom_iam_policy_provided
+| bool
+| false
+| Indicate if a bastion_custom_iam_policy is provided (Terraform will raise an error if a bastion_custom_iam_policy is rovided and the value is set to false)
+
 | bastion_custom_iam_policy
 | any
 | null
@@ -166,6 +184,36 @@ ssh -i ./bastion_private_key.pem -p <classic_bastion_ssh_port> ec2-user@<classic
 | string
 | "t2.nano"
 | The bastion instance type
+
+| aditionnal_cloud_init_packages_provided
+| bool
+| false
+| Indicate if an aditionnal_cloud_init_packages is provided (Terraform will raise an error if a aditionnal_cloud_init_packages is rovided and the value is set to false)
+
+| aditionnal_cloud_init_packages
+| string
+| null
+| Cloud Init YAML string starting with 'packages:'
+
+| aditionnal_cloud_init_write_files_provided
+| bool
+| false
+| Indicate if an aditionnal_cloud_init_write_files is provided (Terraform will raise an error if a aditionnal_cloud_init_write_files is rovided and the value is set to false)
+
+| aditionnal_cloud_init_write_files
+| string
+| null
+| Cloud Init YAML string starting with 'write_files:'
+
+| aditionnal_cloud_init_runcmd_provided
+| bool
+| false
+| Indicate if an aditionnal_cloud_init_runcmd is provided (Terraform will raise an error if a aditionnal_cloud_init_runcmd is rovided and the value is set to false)
+
+| aditionnal_cloud_init_runcmd
+| string
+| null
+| Cloud Init YAML string starting with 'runcmd:'
 
 |=== 
 
@@ -181,6 +229,14 @@ ssh -i ./bastion_private_key.pem -p <classic_bastion_ssh_port> ec2-user@<classic
 | bastion_session_manager_url
 | string
 | The temporary tokenized URL that will allow you to connect to the deployed bastion instance via AWS Session Manager
+
+| iam_role_temporary_credentials
+| map
+| The temporary AWS credentials that have been used to generate the bastion_session_manager_url (can be used to perform an SSH connection directly through Session Manager via aws-cli) 
+
+| bastion_instance_id
+| string
+| The EC2 instance ID of the bastion
 
 | bastion_private_ip
 | string
